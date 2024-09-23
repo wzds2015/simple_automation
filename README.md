@@ -1,4 +1,4 @@
-## Check connection with iPhone without ACT
+## Check connection with iPhone
 
 1. Install mujoco:
 
