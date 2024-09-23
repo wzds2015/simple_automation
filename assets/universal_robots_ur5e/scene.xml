@@ -1,0 +1,47 @@
+<mujoco model="ur5e scene">
+  <include file="ur5e.xml"/>
+
+  <statistic center="0.3 0 0.3" extent="0.8" meansize="0.08"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0 0 0"/>
+    <global azimuth="120" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512"
+      mark="cross" markrgb=".8 .8 .8"/>
+    <material name="grid" texture="grid" texrepeat="1 1" texuniform="true"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" directional="true"/>
+      <body name="surface" pos="0.5 0.2 0.1">
+        <!-- <freejoint name="green_box_joint"/> -->
+        <inertial pos="0 0 0" mass="0.1" diaginertia="0.00016667 0.00016667 0.00016667"/>
+        <geom friction="0.01" condim="3" pos="0 0 0" size="0.05 0.05 0.025" type="box" name="green_box1" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.1 0 0" size="0.05 0.05 0.025" type="box" name="green_box2" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.2 0 0" size="0.05 0.05 0.025" type="box" name="green_box3" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0 -0.1 0" size="0.05 0.05 0.025" type="box" name="green_box4" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.1 -0.1 0" size="0.05 0.05 0.025" type="box" name="green_box5" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.2 -0.1 0" size="0.05 0.05 0.025" type="box" name="green_box6" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0 -0.2 0" size="0.05 0.05 0.025" type="box" name="green_box7" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.1 -0.2 0" size="0.05 0.05 0.025" type="box" name="green_box8" rgba="0.0 0.5 0 1" priority="1"/>
+        <geom friction="0.01" condim="3" pos="0.2 -0.2 0" size="0.05 0.05 0.025" type="box" name="green_box9" rgba="0.0 0.5 0 1" priority="1"/>
+    </body>
+    <geom name="floor" size="1 1 0.01" type="plane" material="grid"/>
+    <camera name="camera_front" pos="0.049 1.888 0.717" xyaxes="-0.998 0.056 -0.000 -0.019 -0.335 0.942"/>
+		<camera name="camera_top" pos="0 0 2" euler="0 0 0" mode="fixed"/>
+    <body name="target" pos="0.5 0 .5" quat="0 1 0 0" mocap="true">
+      <geom type="box" size=".05 .05 .05" contype="0" conaffinity="0" rgba=".6 .3 .3 .2"/>
+    </body>
+    <body name="wall" pos="10.5 0 0.1">
+      <geom name="wall" type="box" size=".1 .1 .1"/>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <fromto geom1="wrist_3_link" geom2="wall" cutoff="1"/>
+    <fromto geom1="wrist_3_link" geom2="floor" cutoff="1"/>
+  </sensor>
+</mujoco>
