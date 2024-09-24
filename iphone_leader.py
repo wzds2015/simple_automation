@@ -29,12 +29,15 @@ class IPhoneLeader:
         self.frame_name = frame_name
         self.frame_type = frame_type
         self.motors_pos = np.zeros(6)
+        self.is_connected = False
+        self.mujocoAR = None
+        print("constructor")
         pass
 
         
     def connect(self):
         self.is_connected = True
-        
+
         model = self.configuration.model
         data = self.configuration.data
 
@@ -129,7 +132,8 @@ class IPhoneLeader:
 
     def disconnect(self):
         if(self.is_connected):
-            self.mujocoAR.stop()
+            if(self.mujocoAR):
+                self.mujocoAR.stop()
             self.is_connected = False
 
     def __del__(self):

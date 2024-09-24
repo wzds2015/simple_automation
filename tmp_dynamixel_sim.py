@@ -25,10 +25,10 @@ from lerobot.common.datasets.utils import (
 from lerobot.common.datasets.video_utils import VideoFrame, encode_video_frames
 from lerobot.scripts.push_dataset_to_hub import push_meta_data_to_hub, push_videos_to_hub, save_meta_data
 from lerobot.common.robot_devices.motors.dynamixel import DynamixelMotorsBus
-from simulated.koch import KochRobot
 
 # from lerobot.common.robot_devices.cameras.sim import SimCamera
-from lerobot.scripts.sim_camera import SimCamera
+from sim_camera import SimCamera
+from koch import KochRobot
 
 
 ### SimCamera classes
@@ -65,7 +65,7 @@ class SimDynamixelMotorsBus:
     def __init__(
         self,
         motors,
-        path_scene="lerobot/assets/low_cost_robot_6dof/pick_place_cube.xml"
+        path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
     ):
         
         self.path_scene = path_scene
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--leader-port", type=str, default="/dev/ttyACM0", help="Port for the leader motors")
-    parser.add_argument("--calibration-path", type=str, default=".cache/calibration/koch.pkl", help="Path to the robots calibration file")  
+    parser.add_argument("--calibration-path", type=str, default="cache/calibration/koch.pkl", help="Path to the robots calibration file")  
     parser.add_argument("--test-leader", action="store_true", help="Test the leader motors")
     parser.add_argument("--mujoco-replace-cube", action="store_true", help="Replace the cube in the mujoco environment")
 
@@ -451,7 +451,7 @@ if __name__ == "__main__":
             )
 
     follower = SimDynamixelMotorsBus(
-                path_scene="lerobot/assets/low_cost_robot_6dof/pick_place_cube.xml",
+                path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml",
                 motors={
                     # name: (index, model)
                     "shoulder_pan": (1, "xl430-w250"),
@@ -584,6 +584,10 @@ if __name__ == "__main__":
             ## store the episode data in the overall data list
             ep_dicts.append(ep_dict)
             ep_idx += 1
+
+# TMP
+            if(ep_idx > 0):
+                stop_record = True
 
     ## end the teleoperation
     robot.disconnect()

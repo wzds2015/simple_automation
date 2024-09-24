@@ -65,13 +65,13 @@ def teleoperate(robot: Robot, fps: int | None = None, teleop_time_s: float | Non
 
     # frame_name="static_side",
     # frame_type="geom",
-    print("teleop_time_s", teleop_time_s)
 
     robot.connect()
 
+
     # TELEOPERATE
 
-    sim_fps = 500
+    sim_fps = 30
     teleop_fps = 30
     sim_teleop_ratio = math.ceil(sim_fps / teleop_fps)
 
@@ -453,7 +453,7 @@ if __name__ == "__main__":
 
 
     path_scene="assets/universal_robots_ur5e/scene.xml"
-    # path_scene="lerobot/assets/low_cost_robot_6dof/pick_place_cube.xml"
+    # path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
 
     model = mujoco.MjModel.from_xml_path(path_scene)
     data = mujoco.MjData(model)
@@ -473,6 +473,7 @@ if __name__ == "__main__":
         "image_top":   SimCamera(id_camera="camera_top",   model=model, data=data, camera_index=0, fps=30, width=640, height=480),
         "image_front": SimCamera(id_camera="camera_front", model=model, data=data, camera_index=1, fps=30, width=640, height=480),
     }
+
 
     robot = ManipulatorRobot(
         leader_arms={"main": leader_arm},
@@ -498,7 +499,9 @@ if __name__ == "__main__":
         elif control_mode == "replay":
             replay(robot, **kwargs) 
     except Exception as e:
+        print(f"Error: {e}")
         robot.disconnect()
+        pass
 
 
     if robot.is_connected:
