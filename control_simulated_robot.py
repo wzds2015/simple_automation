@@ -35,7 +35,7 @@ from lerobot.common.datasets.video_utils import encode_video_frames
 from lerobot.common.policies.factory import make_policy
 from lerobot.common.robot_devices.robots.factory import make_robot
 from lerobot.common.robot_devices.robots.manipulator import ManipulatorRobot
-from lerobot.common.robot_devices.robots.sim_robot import SimRobot, SimRobotConfig
+# from lerobot.common.robot_devices.robots.sim_robot import SimRobot, SimRobotConfig
 from lerobot.common.robot_devices.robots.utils import Robot, get_arm_id
 from lerobot.common.robot_devices.utils import busy_wait
 from lerobot.common.utils.utils import get_safe_torch_device, init_hydra_config, init_logging, set_global_seed
@@ -373,7 +373,7 @@ def record(robot: Robot):
                 continue
             # note: `encode_video_frames` is a blocking call. Making it asynchronous shouldn't speedup encoding,
             # since video encoding with ffmpeg is already using multithreading.
-            encode_video_frames(tmp_imgs_dir, video_path, teleop_fps, overwrite=True)
+            encode_video_frames(tmp_imgs_dir, video_path, teleop_fps, vcodec="libx264", overwrite=True)
             shutil.rmtree(tmp_imgs_dir)
 
     ep_dicts = []
