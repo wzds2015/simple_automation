@@ -41,3 +41,13 @@ mjpython control_simulated_robot.py teleoperate
 ```bash
 mjpython control_simulated_robot.py record
 ```
+
+## Visualise episode
+
+Go to Lerobot folder and run command bellow. Don't forget to change absolute address
+
+```bash
+python lerobot/scripts/visualize_dataset_html.py \
+  --root /Users/igor/Documents/_Develop/_Robotics/simple_automation/data \
+  --repo-id 1g0rrr/test_painting
+```

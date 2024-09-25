@@ -61,6 +61,42 @@ def none_or_int(value):
         return None
     return int(value)
 
+def resetColor(model, data):
+    initial_color = [0.0, 0.5, 0, 1]  # RGBA format 
+
+    for i in range(1, 10):
+        model.geom_rgba[mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, f"green_box{i}")] = initial_color
+    
+def checkCollisions(model, data):
+    mujoco.mj_collision(model, data)
+
+    new_color = [1.0, 0.0, 0.0, 1.0]  # RGBA format 
+    # Check collision with specific objects
+
+    for i in range(data.ncon):
+        try:
+            contact = data.contact[i]
+            geom1_id = contact.geom1
+            geom2_id = contact.geom2
+
+            body1_id = model.geom_bodyid[geom1_id]
+            body2_id = model.geom_bodyid[geom2_id]
+
+            body1_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body1_id)
+            body2_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body2_id)
+
+            if (body1_name == "wrist_3_link" and body2_name == "surface") or (body1_name == "surface" and body2_name == "wrist_3_link"):
+                # print(f"Collision detected between {geom1_name} and {geom2_name}")
+                if body1_name == "surface":
+                    # print(geom1_id)
+                    model.geom_rgba[geom1_id] = new_color
+                elif body2_name == "surface":
+                    # print(geom1_id)
+                    model.geom_rgba[geom2_id] = new_color
+        except Exception as e:
+            print(e)    
+
+
 def teleoperate(robot: Robot, fps: int | None = None, teleop_time_s: float | None = None):
 
     # frame_name="static_side",
@@ -88,6 +124,8 @@ def teleoperate(robot: Robot, fps: int | None = None, teleop_time_s: float | Non
             if counter % sim_teleop_ratio == 0:
                 robot.teleop_step()
 
+            checkCollisions(model, data)
+
             mujoco.mj_camlight(model, data)
 
             # Note the below are optional: they are used to visualize the output of the
@@ -107,10 +145,10 @@ def record(robot: Robot):
     repo_id="1g0rrr/test_painting"
     root="data"
     force_override=True
-    warmup_time_s=0
+    warmup_time_s=5
     episode_time_s=10
     reset_time_s=5
-    num_episodes=1
+    num_episodes=2
     num_image_writers_per_camera=4
     device="cpu"
     seed = 1000
@@ -183,44 +221,45 @@ def record(robot: Robot):
 
     # Execute a few seconds without recording data, to give times
     # to the robot devices to connect and start synchronizing.
-    timestamp = 0
-    # start_warmup_t = time.perf_counter()
-    # is_warmup_print = False
-    # while timestamp < warmup_time_s:
-    #     if not is_warmup_print:
-    #         print("Warming up")
-    #         is_warmup_print = True
 
-
-            
-    #     start_loop_t = time.perf_counter()
-
-    #     if counter % sim_teleop_ratio == 0:
-    #         if policy is None:
-    #             observation, action = robot.teleop_step(record_data=True)
-    #         else:
-    #             observation = robot.capture_observation()
-
-    #     mujoco.mj_camlight(model, data)
-
-    #     # Note the below are optional: they are used to visualize the output of the
-    #     # fromto sensor which is used by the collision avoidance constraint.
-    #     mujoco.mj_fwdPosition(model, data)
-    #     mujoco.mj_sensorPos(model, data)
-
-    #     # viewer.sync()
-
-    #     dt_s = time.perf_counter() - start_loop_t
-    #     busy_wait(1 / sim_fps - dt_s)
-
-    #     dt_s = time.perf_counter() - start_loop_t
-
-    #     timestamp = time.perf_counter() - start_warmup_t
 
     # Save images using threads to reach high fps (30 and more)
     # Using `with` to exist smoothly if an execption is raised.
     with mujoco.viewer.launch_passive(model, data) as viewer:
         mujoco.mjv_defaultFreeCamera(model, viewer.cam)
+
+
+        timestamp = 0
+        start_warmup_t = time.perf_counter()
+        is_warmup_print = False
+        while timestamp < warmup_time_s:
+            if not is_warmup_print:
+                print("Warming up")
+                is_warmup_print = True
+
+            start_loop_t = time.perf_counter()
+
+            if counter % sim_teleop_ratio == 0:
+                if policy is None:
+                    observation, action = robot.teleop_step(record_data=True)
+                else:
+                    observation = robot.capture_observation()
+
+            mujoco.mj_camlight(model, data)
+
+            # Note the below are optional: they are used to visualize the output of the
+            # fromto sensor which is used by the collision avoidance constraint.
+            mujoco.mj_fwdPosition(model, data)
+            mujoco.mj_sensorPos(model, data)
+
+            viewer.sync()
+
+            dt_s = time.perf_counter() - start_loop_t
+            busy_wait(1 / sim_fps - dt_s)
+
+            dt_s = time.perf_counter() - start_loop_t
+
+            timestamp = time.perf_counter() - start_warmup_t
 
 
         futures = []
@@ -233,11 +272,16 @@ def record(robot: Robot):
                 frame_index = 0
                 timestamp = 0
                 start_episode_t = time.perf_counter()
+
+                resetColor(model, data)
+                viewer.sync()
+
                 while timestamp < episode_time_s:
                     start_loop_t = time.perf_counter()
 
                     if counter % sim_teleop_ratio == 0:
                         observation, action = robot.teleop_step(record_data=True)
+
 
                         image_keys = [key for key in observation if "image" in key]
                         not_image_keys = [key for key in observation if "image" not in key]
@@ -262,6 +306,8 @@ def record(robot: Robot):
                             ep_dict[key].append(action[key])
 
                         frame_index += 1
+
+                    checkCollisions(model, data)
 
                     mujoco.mj_camlight(model, data)
 
@@ -468,6 +514,7 @@ if __name__ == "__main__":
         frame_type="site",
     )
     follower_arm = SimulatedFollower(configuration)
+    
 
     cameras = {
         "image_top":   SimCamera(id_camera="camera_top",   model=model, data=data, camera_index=0, fps=30, width=640, height=480),

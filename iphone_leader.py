@@ -28,7 +28,8 @@ class IPhoneLeader:
         self.configuration = configuration
         self.frame_name = frame_name
         self.frame_type = frame_type
-        self.motors_pos = np.zeros(6)
+        self.motors_pos = np.array([-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0])
+        # self.motors_pos = np.zeros(6)
         self.is_connected = False
         self.mujocoAR = None
         print("constructor")
@@ -38,13 +39,16 @@ class IPhoneLeader:
     def connect(self):
         self.is_connected = True
 
+        # init_pos_rad = np.array([-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0])
+        # self.motors_pos = init_pos_rad
+
         model = self.configuration.model
         data = self.configuration.data
 
         collision_pairs = [
-            (["wrist_3_link"], ["floor", "wall", "green_box1", "green_box2", "green_box3", "green_box4", "green_box5", "green_box6", "green_box7", "green_box8", "green_box9"]),
-            # (["static_side"], ["floor"]),
+            # (["wrist_3_link"], ["floor", "wall", *[f"green_box{i}" for i in range(1, 10)]]),
         ]
+
         self.limits = [
             mink.ConfigurationLimit(model=model),
             mink.CollisionAvoidanceLimit(model=model, geom_pairs=collision_pairs),
@@ -72,7 +76,7 @@ class IPhoneLeader:
 
 
         self.configuration.update_from_keyframe("home")
-        mink.move_mocap_to_frame(model, data, "target", self.frame_name, self.frame_type)
+        # mink.move_mocap_to_frame(model, data, "target", self.frame_name, self.frame_type)
 
         self.mujocoAR = MujocoARConnector(mujoco_model=model, mujoco_data=data, port=8888)
         self.mujocoAR.start()
@@ -86,6 +90,10 @@ class IPhoneLeader:
             position_origin=initial_pos,
             rotation_origin=initial_mat,
         )
+
+
+        # self.write("Initial Pos", values=initialPosNd)
+
         pass
 
     def _readInRadians(self):
@@ -108,13 +116,13 @@ class IPhoneLeader:
         T_wt = mink.SE3.from_mocap_name(model, data, "target")
         self.end_effector_task.set_target(T_wt)
 
-        dt_s = 0.002
+        dt_s = 1 / 30.0
 
         vel = mink.solve_ik(
             configuration, tasks, dt_s, "quadprog", 1e-3, limits=limits
         )
 
-        d = vel * 0.002
+        d = vel * 0.01
         new_position_delta = d[-6:]
 
         new_position_rad = self._readInRadians() + new_position_delta
@@ -125,6 +133,13 @@ class IPhoneLeader:
         return res
 
     def write(self, data_name, values: int | float | np.ndarray, motor_names: str | list[str] | None = None):
+        # pos_in_degrees = values / 1000.0
+
+        # # pos_in_degrees = values
+        # pos_in_rad = np.deg2rad(pos_in_degrees)
+
+        # # вариант с позицией новой
+        # self.data.qpos[-6:] = pos_in_rad
         pass
 
     def set_calibration(self, calibration: dict[str, tuple[int, bool]]):

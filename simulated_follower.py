@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import tqdm
+import mujoco
 
 
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
@@ -19,7 +20,6 @@ class SimulatedFollower:
         self,
         configuration,
     ):
-        self.qpos = np.zeros(12)
         self.configuration = configuration
         pass
 
@@ -27,11 +27,18 @@ class SimulatedFollower:
         self.is_connected = True
         self.data = self.configuration.data
         self.model = self.configuration.model
+
+        init_pos_rad = [-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0]
+        self.data.qpos[-6:] = init_pos_rad
+        mujoco.mj_forward(self.model, self.data)
+
         pass
 
     def read(self, data_name, motor_names: str | list[str] | None = None):
         old_pos = self.data.qpos[-6:]        
-        return old_pos
+        pos_in_deg = np.rad2deg(old_pos)
+        res = pos_in_deg * 1000.0
+        return res
 
     def set_calibration(self, calibration: dict[str, tuple[int, bool]]):
         self.calibration = calibration
@@ -46,14 +53,13 @@ class SimulatedFollower:
         # pos_in_degrees = values
         pos_in_rad = np.deg2rad(pos_in_degrees)
 
-        # вариант с позицией новой
-        # self.data.qpos[-6:] = pos_in_rad
+        self.data.qpos[-6:] = pos_in_rad
 
-        old_pos = self.data.qpos[-6:]
-        vel = (pos_in_rad - old_pos) * 500.0
+        # old_pos = self.data.qpos[-6:]
+        # vel = (pos_in_rad - old_pos) * 500.0
 
-        dt_s = 0.002
-        self.configuration.integrate_inplace(vel, dt_s)
+        # dt_s = 1/30.0
+        # self.configuration.integrate_inplace(vel, dt_s)
 
         pass
 
