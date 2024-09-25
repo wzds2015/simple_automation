@@ -21,6 +21,7 @@ class SimulatedFollower:
         configuration,
     ):
         self.configuration = configuration
+        self.old_pos = np.zeros(12)
         pass
 
     def connect(self):
@@ -30,14 +31,16 @@ class SimulatedFollower:
 
         init_pos_rad = [-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0]
         self.data.qpos[-6:] = init_pos_rad
+        self.old_pos = deepcopy(self.data.qpos[-6:])
+        # deep copy
         mujoco.mj_forward(self.model, self.data)
 
         pass
 
     def read(self, data_name, motor_names: str | list[str] | None = None):
-        old_pos = self.data.qpos[-6:]        
+        old_pos = self.old_pos[-6:]        
         pos_in_deg = np.rad2deg(old_pos)
-        res = pos_in_deg * 1000.0
+        res = pos_in_deg * 100
         return res
 
     def set_calibration(self, calibration: dict[str, tuple[int, bool]]):
@@ -48,13 +51,18 @@ class SimulatedFollower:
         if data_name in ["Torque_Enable", "Operating_Mode", "Homing_Offset", "Drive_Mode", "Position_P_Gain", "Position_I_Gain", "Position_D_Gain"]:
             return np.array(None)
 
-        pos_in_degrees = values / 1000.0
+        self.old_pos = deepcopy(self.data.qpos[-6:])
+
+        pos_in_degrees = values / 100
 
         # pos_in_degrees = values
         pos_in_rad = np.deg2rad(pos_in_degrees)
 
-        self.data.qpos[-6:] = pos_in_rad
 
+        self.data.qpos[-6:] = pos_in_rad
+        # old
+
+        # viewer.sync()
         # old_pos = self.data.qpos[-6:]
         # vel = (pos_in_rad - old_pos) * 500.0
 

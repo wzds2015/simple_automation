@@ -12,6 +12,7 @@ import mink
 from mujoco_ar import MujocoARConnector
 import mujoco
 import mujoco.viewer
+import torch
 
 
 from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError, RobotDeviceNotConnectedError
@@ -29,7 +30,6 @@ class IPhoneLeader:
         self.frame_name = frame_name
         self.frame_type = frame_type
         self.motors_pos = np.array([-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0])
-        # self.motors_pos = np.zeros(6)
         self.is_connected = False
         self.mujocoAR = None
         print("constructor")
@@ -128,18 +128,12 @@ class IPhoneLeader:
         new_position_rad = self._readInRadians() + new_position_delta
         self.motors_pos = new_position_rad
         new_position_degrees = np.rad2deg(new_position_rad)
-        res = new_position_degrees * 1000.0
-
+        res = new_position_degrees * 100
+        res = torch.from_numpy(res)
+        res = res.numpy().astype(np.int32)
         return res
 
     def write(self, data_name, values: int | float | np.ndarray, motor_names: str | list[str] | None = None):
-        # pos_in_degrees = values / 1000.0
-
-        # # pos_in_degrees = values
-        # pos_in_rad = np.deg2rad(pos_in_degrees)
-
-        # # вариант с позицией новой
-        # self.data.qpos[-6:] = pos_in_rad
         pass
 
     def set_calibration(self, calibration: dict[str, tuple[int, bool]]):
