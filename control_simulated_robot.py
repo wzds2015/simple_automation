@@ -148,7 +148,7 @@ def record(robot: Robot):
     warmup_time_s=5
     episode_time_s=10
     reset_time_s=5
-    num_episodes=2
+    num_episodes=1
     num_image_writers_per_camera=4
     device="cpu"
     seed = 1000
@@ -279,6 +279,8 @@ def record(robot: Robot):
                 while timestamp < episode_time_s:
                     start_loop_t = time.perf_counter()
 
+                    viewer.sync()
+
                     if counter % sim_teleop_ratio == 0:
                         observation, action = robot.teleop_step(record_data=True)
 
@@ -311,10 +313,10 @@ def record(robot: Robot):
 
                     mujoco.mj_camlight(model, data)
 
-                    mujoco.mj_fwdPosition(model, data)
+                    # mujoco.mj_fwdPosition(model, data)
                     mujoco.mj_sensorPos(model, data)
+                    mujoco.mj_forward(model, data)
 
-                    viewer.sync()
 
                     dt_s = time.perf_counter() - start_loop_t
                     busy_wait(1 / sim_fps - dt_s)
