@@ -498,8 +498,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    path_scene="assets/universal_robots_ur5e/scene.xml"
-    # path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
+    # path_scene="assets/universal_robots_ur5e/scene.xml"
+    path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
 
     model = mujoco.MjModel.from_xml_path(path_scene)
     data = mujoco.MjData(model)
