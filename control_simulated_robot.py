@@ -453,7 +453,7 @@ def record(robot: Robot):
     )
     if run_compute_stats:
         print("Computing dataset statistics")
-        stats = compute_stats(lerobot_dataset)
+        stats = compute_stats(lerobot_dataset, num_workers=4)
         lerobot_dataset.stats = stats
     else:
         stats = {}
