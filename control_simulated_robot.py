@@ -518,6 +518,11 @@ if __name__ == "__main__":
         # frame_type = "body"
         frame_name = "end_effector"
         frame_type = "geom"
+    elif args.robot_name == "lc":
+        path_scene="assets/low_cost_robot_alex/scene.xml"
+        robot_name = "lc"
+        frame_name = "end_effector"
+        frame_type = "geom"
     else:
         raise KeyError(f"Robot name not support: {args.robot_name}")
 

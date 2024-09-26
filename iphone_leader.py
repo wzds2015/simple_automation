@@ -73,6 +73,16 @@ class IPhoneLeader:
                 "wrist_flex_joint": np.pi, 
                 "wrist_roll_joint": np.pi,
             }
+        elif self.robot_name == "lc":
+            max_velocities = {
+                "joint1": np.pi, 
+                "joint2": np.pi, 
+                "joint3": np.pi, 
+                "joint4": np.pi, 
+                "joint5": np.pi, 
+            }
+        else:
+            raise KeyError(f"Robot name not found supported: {self.robot_name}")
         velocity_limit = mink.VelocityLimit(model, max_velocities)
         self.limits.append(velocity_limit)
 
