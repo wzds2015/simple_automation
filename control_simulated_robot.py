@@ -153,7 +153,7 @@ def record(robot: Robot):
     device="cpu"
     seed = 1000
     video=True
-    run_compute_stats=False
+    run_compute_stats=True
     push_to_hub=False
 
     _, dataset_name = repo_id.split("/")
@@ -480,6 +480,33 @@ def record(robot: Robot):
 def replay(robot: Robot):
     pass
 
+def fix_stats():
+
+    repo_id="1g0rrr/test_painting"
+    root="data"
+
+    local_dir = Path(root) / repo_id
+
+    lerobot_dataset = LeRobotDataset(repo_id, root, "train")
+
+    stats = compute_stats(lerobot_dataset, num_workers=4)
+    lerobot_dataset.stats = stats
+
+    meta_data_dir = local_dir / "meta_data"
+    teleop_fps = 30
+
+    hf_dataset = lerobot_dataset.hf_dataset
+    episode_data_index = calculate_episode_data_index(hf_dataset)
+    info = {
+        "codebase_version": CODEBASE_VERSION,
+        "fps": teleop_fps,
+        "video": True,
+    }
+    info["encoding"] = get_default_encoding()    
+    save_meta_data(info, stats, episode_data_index, meta_data_dir)
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="mode", required=False)
@@ -504,6 +531,7 @@ if __name__ == "__main__":
     parser_record = subparsers.add_parser("record", parents=[base_parser])
 
     parser_replay = subparsers.add_parser("replay", parents=[base_parser])
+    parser_replay = subparsers.add_parser("stats", parents=[base_parser])
     args = parser.parse_args()
 
     if args.robot_name == "ur5e":
@@ -566,6 +594,8 @@ if __name__ == "__main__":
 
         elif control_mode == "replay":
             replay(robot=robot) 
+        elif control_mode == "stats":
+            fix_stats()
     except Exception as e:
         print(f"Error: {e}")
         robot.disconnect()
