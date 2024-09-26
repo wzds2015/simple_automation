@@ -25,10 +25,12 @@ class IPhoneLeader:
         configuration,
         frame_name,
         frame_type,
+        robot_name,
     ):
         self.configuration = configuration
         self.frame_name = frame_name
         self.frame_type = frame_type
+        self.robot_name = robot_name
         self.motors_pos = np.array([-1.5708, -1.5708, 1.5708, -1.5708, -1.5708, 0])
         self.is_connected = False
         self.mujocoAR = None
@@ -53,14 +55,24 @@ class IPhoneLeader:
             mink.ConfigurationLimit(model=model),
             mink.CollisionAvoidanceLimit(model=model, geom_pairs=collision_pairs),
         ]
-        max_velocities = {
-            "shoulder_pan": np.pi,
-            "shoulder_lift": np.pi,
-            "elbow": np.pi,
-            "wrist_1": np.pi,
-            "wrist_2": np.pi,
-            "wrist_3": np.pi,
-        }        
+        if self.robot_name == "ur5e":
+            max_velocities = {
+                "shoulder_pan": np.pi,
+                "shoulder_lift": np.pi,
+                "elbow": np.pi,
+                "wrist_1": np.pi,
+                "wrist_2": np.pi,
+                "wrist_3": np.pi,
+            }        
+        elif self.robot_name == "lerobot":
+            max_velocities = {
+                "elbow_flex_joint": np.pi, 
+                "gripper_joint": np.pi, 
+                "shoulder_lift_joint": np.pi, 
+                "shoulder_pan_joint": np.pi, 
+                "wrist_flex_joint": np.pi, 
+                "wrist_roll_joint": np.pi,
+            }
         velocity_limit = mink.VelocityLimit(model, max_velocities)
         self.limits.append(velocity_limit)
 

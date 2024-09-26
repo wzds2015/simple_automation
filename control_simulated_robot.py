@@ -97,7 +97,7 @@ def checkCollisions(model, data):
             print(e)    
 
 
-def teleoperate(robot: Robot, fps: int | None = None, teleop_time_s: float | None = None):
+def teleoperate(robot: Robot, teleop_time_s: float | None = None):
 
     # frame_name="static_side",
     # frame_type="geom",
@@ -146,7 +146,7 @@ def record(robot: Robot):
     root="data"
     force_override=True
     warmup_time_s=5
-    episode_time_s=10
+    episode_time_s=30
     reset_time_s=5
     num_episodes=1
     num_image_writers_per_camera=4
@@ -477,7 +477,7 @@ def record(robot: Robot):
     return lerobot_dataset
 
 
-def replay(robot: Robot, fps: int | None = None):
+def replay(robot: Robot):
     pass
 
 if __name__ == "__main__":
@@ -486,6 +486,12 @@ if __name__ == "__main__":
 
     # Set common options for all the subparsers
     base_parser = argparse.ArgumentParser(add_help=False)
+    base_parser.add_argument(
+        "--robot_name",
+        type=str,
+        default="ur5e",
+        help="Name of the robot",
+    )
 
     parser_teleop = subparsers.add_parser("teleoperate", parents=[base_parser])
     parser_teleop.add_argument(
@@ -493,15 +499,27 @@ if __name__ == "__main__":
         type=int,
         default=10,
         help="Number of seconds.",
-    )    
+    )
+        
     parser_record = subparsers.add_parser("record", parents=[base_parser])
 
     parser_replay = subparsers.add_parser("replay", parents=[base_parser])
     args = parser.parse_args()
 
-
-    path_scene="assets/universal_robots_ur5e/scene.xml"
-    # path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
+    if args.robot_name == "ur5e":
+        path_scene="assets/universal_robots_ur5e/scene.xml"
+        robot_name = "ur5e"
+        frame_name = "attachment_site"
+        frame_type = "site"
+    elif args.robot_name == "lerobot":
+        path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
+        robot_name = "lerobot"
+        # frame_name = "gripper_assembly"
+        # frame_type = "body"
+        frame_name = "end_effector"
+        frame_type = "geom"
+    else:
+        raise KeyError(f"Robot name not support: {args.robot_name}")
 
     model = mujoco.MjModel.from_xml_path(path_scene)
     data = mujoco.MjData(model)
@@ -512,8 +530,9 @@ if __name__ == "__main__":
     
     leader_arm = IPhoneLeader(
         configuration,
-        frame_name="attachment_site",
-        frame_type="site",
+        frame_name=frame_name,
+        frame_type=frame_type,
+        robot_name=robot_name,
     )
     follower_arm = SimulatedFollower(configuration)
     
@@ -540,13 +559,13 @@ if __name__ == "__main__":
 
     try:
         if control_mode == "teleoperate":
-            teleoperate(robot, **kwargs)
+            teleoperate(robot=robot, teleop_time_s=args.teleop_time_s)
 
         elif control_mode == "record":
-            record(robot, **kwargs)
+            record(robot=robot)
 
         elif control_mode == "replay":
-            replay(robot, **kwargs) 
+            replay(robot=robot) 
     except Exception as e:
         print(f"Error: {e}")
         robot.disconnect()
