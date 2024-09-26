@@ -146,7 +146,7 @@ def record(robot: Robot):
     root="data"
     force_override=True
     warmup_time_s=5
-    episode_time_s=10
+    episode_time_s=30
     reset_time_s=5
     num_episodes=1
     num_image_writers_per_camera=4
@@ -486,6 +486,12 @@ if __name__ == "__main__":
 
     # Set common options for all the subparsers
     base_parser = argparse.ArgumentParser(add_help=False)
+    base_parser.add_argument(
+        "--robot_name",
+        type=str,
+        default="ur5e",
+        help="Name of the robot",
+    )
 
     parser_teleop = subparsers.add_parser("teleoperate", parents=[base_parser])
     parser_teleop.add_argument(
@@ -493,12 +499,6 @@ if __name__ == "__main__":
         type=int,
         default=10,
         help="Number of seconds.",
-    )
-    parser_teleop.add_argument(
-        "--robot_name",
-        type=str,
-        default="ur5e",
-        help="Name of the robot",
     )
         
     parser_record = subparsers.add_parser("record", parents=[base_parser])
@@ -514,8 +514,10 @@ if __name__ == "__main__":
     elif args.robot_name == "lerobot":
         path_scene="assets/low_cost_robot_6dof/pick_place_cube.xml"
         robot_name = "lerobot"
-        frame_name = "gripper_assembly"
-        frame_type = "body"
+        # frame_name = "gripper_assembly"
+        # frame_type = "body"
+        frame_name = "end_effector"
+        frame_type = "geom"
     else:
         raise KeyError(f"Robot name not support: {args.robot_name}")
 

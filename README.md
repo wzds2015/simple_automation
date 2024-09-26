@@ -30,16 +30,16 @@ mjpython arm_ur5e.py
 1. Install Lerobot in another folder following the installation section:
    https://github.com/huggingface/lerobot
 
-2. Run teleoperation and control robot with MuJoCo AR app from previous section.
+2. Run teleoperation and control robot with MuJoCo AR app from previous section (low cost robot)
 
 ```bash
-mjpython control_simulated_robot.py teleoperate
+mjpython control_simulated_robot.py teleoperate --robot_name lerobot
 ```
 
-3. Run episode recording
+3. Run episode recording (ur5e)
 
 ```bash
-mjpython control_simulated_robot.py record
+mjpython control_simulated_robot.py record --robot_name ur5e
 ```
 
 ## Visualise episode

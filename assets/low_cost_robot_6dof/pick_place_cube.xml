@@ -33,19 +33,36 @@
 
 	<worldbody>
 
-        <body name="target" pos="0.1 0.1 .1" quat="0 0.64 0 0.77" mocap="true">
-            <geom type="sphere" size=".05 .05 .05" contype="0" conaffinity="0" rgba=".6 .3 .3 .2"/>
-        </body>
+        <!-- <body name="target" pos="0.1 0.1 .1" quat="0 0.64 0 0.77" mocap="true"> -->
+		<!-- <body name="cube" pos="0.1 0.1 .1" quat="0 0.64 0 0.77">
+            <geom type="box" size=".03 .03 .03" contype="0" conaffinity="0" rgba=".1 .1 .1 1"/>
+		</body> -->
 
-		<light pos="0 0 3" dir="0 0 -1" directional="false" />
+		<body name="target" pos="-0.00838199 -0.000256591 -0.003" mocap="true">
+			<geom type="box" size=".01 .01 .01" contype="0" conaffinity="0" rgba=".6 .3 .3 .2"/>
+		</body>
+		
+
+		<!-- <body name="target" pos="0.1 0.1 .1" quat="0 0.64 0 0.77">
+			<geom type="box" size="0.03 0.03 0.03" solimp="0.998 0.998 0.001" solref="0.001 1" density="500" rgba="1 0.56 0.43 1"/>
+			<joint type="free" damping="0.0005"/>
+		</body> -->
+		
+        <light pos="0 0 3" dir="0 0 -1" directional="false" />
 		<body name="floor">
 			<geom pos="0 0 0" name="floor" size="0 0 .125" type="plane" material="groundplane" conaffinity="1" contype="1" />
 		</body>
 
-		<body name="cube" pos="0.1 0.1 0.01">
+		<!-- <body name="cube" pos="0.1 0.1 0.01">
 			<freejoint name="cube"/>
 			<inertial pos="0 0 0" mass="10.0" diaginertia="0.00001125 0.00001125 0.00001125"/>
 			<geom friction="0.5" condim="3" pos="0 0 0" size="0.015 0.015 0.015" type="box" name="cube" rgba="0.5 0 0 1" priority="1"/>
+		</body> -->
+
+		<body name="cube" pos="0.1 0.1 0.01">
+			<freejoint name="cube"/>
+			<inertial pos="0 0 0" mass="10.0" diaginertia="0.00001125 0.00001125 0.00001125"/>
+			<geom friction="0.5" condim="3" pos="0 0 0" size="0.1 0.1 0.1" type="box" name="cube" rgba="0.5 0.5 0.5 1" priority="1"/>
 		</body>
 
 
@@ -122,13 +139,14 @@
 							<body name="moving_side" pos="0.00755 -0.01475 -0.013" quat="0.707107 -0.707107 0 0">
 								<inertial pos="-0.000395599 0.022415 0.0145636" quat="0.722353 0.689129 0.0389102 0.0423547" mass="0.0089856" diaginertia="3.28451e-06 2.24898e-06 1.41539e-06"/>
 								<joint name="gripper_joint" pos="0 0 0" axis="0 0 1" range="-1.74533 0.0523599"  damping="0.1" actuatorfrcrange="-0.5 0.5" actuatorfrclimited="true"/>
-								<geom pos="-0.00838199 -0.000256591 -0.003" type="mesh" rgba="0.768627 0.886275 0.952941 1" mesh="moving_side"/>
+								<geom name="end_effector" pos="-0.00838199 -0.000256591 -0.003" type="mesh" rgba="0.768627 0.886275 0.952941 1" mesh="moving_side"/>
 							</body>
 						</body>
 					</body>
 				</body>
 			</body>
 		</body>
+		
 	</worldbody>
 
 	<actuator>
