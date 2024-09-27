@@ -146,7 +146,7 @@ def record(robot: Robot):
     root="data"
     force_override=True
     warmup_time_s=5
-    episode_time_s=30
+    episode_time_s=20
     reset_time_s=5
     num_episodes=1
     num_image_writers_per_camera=4
