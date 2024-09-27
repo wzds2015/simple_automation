@@ -51,3 +51,20 @@ python lerobot/scripts/visualize_dataset_html.py \
   --root /Users/igor/Documents/_Develop/_Robotics/simple_automation/data \
   --repo-id 1g0rrr/test_painting
 ```
+
+## Training
+
+Go to Lerobot folder
+Run this command. Don't forget to change DATA_DIR and --config-dir for your locations.
+
+```bash
+DATA_DIR=/Users/igor/Documents/_Develop/_Robotics/simple_automation/data python lerobot/scripts/train.py \
+ --config-dir=/Users/igor/Documents/_Develop/_Robotics/simple_automation/configs \
+  dataset_repo_id=1g0rrr/test_painting \
+  policy=act_simple_automation \
+  env=simple_automation \
+  hydra.run.dir=outputs/train/test_painting \
+  hydra.job.name=act_test_painting \
+  device=mps \
+  wandb.enable=false
+```
