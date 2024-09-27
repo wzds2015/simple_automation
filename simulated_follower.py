@@ -22,8 +22,21 @@ class SimulatedFollower:
     ):
         self.configuration = configuration
         self.old_pos = np.zeros(12)
+        self.motors = {
+                    # name: (index, model)
+                    "shoulder_pan": (1, "xl330-m077"),
+                    "shoulder_lift": (2, "xl330-m077"),
+                    "elbow_flex": (3, "xl330-m077"),
+                    "wrist_flex": (4, "xl330-m077"),
+                    "wrist_roll": (5, "xl330-m077"),
+                    "gripper": (6, "xl330-m077"),
+                }
         pass
-
+    
+    @property
+    def motor_names(self) -> list[str]:
+        return list(self.motors.keys())
+    
     def connect(self):
         self.is_connected = True
         self.data = self.configuration.data

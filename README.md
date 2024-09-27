@@ -68,3 +68,11 @@ DATA_DIR=/Users/igor/Documents/_Develop/_Robotics/simple_automation/data python 
   device=mps \
   wandb.enable=false
 ```
+
+## Evaluate
+
+It will evaluate at the path "outputs/train/test_painting/checkpoints/last/pretrained_model"
+
+```bash
+mjpython control_simulated_robot.py evaluate
+```

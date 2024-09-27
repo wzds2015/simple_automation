@@ -480,6 +480,83 @@ def record(robot: Robot):
 def replay(robot: Robot):
     pass
 
+def evaluate(robot:Robot):
+    global follower
+    global leader
+    global _viewer
+    global repo_id
+    global fps
+
+    inference_time_s = 610
+    fps = 30
+    device = "cpu" # "cuda" or "cpu"
+    robot.connect()
+
+    from lerobot.common.policies.act.modeling_act import ACTPolicy
+    ckpt_path = "outputs/train/test_painting/checkpoints/last/pretrained_model"
+    policy = ACTPolicy.from_pretrained(ckpt_path)
+
+    policy.to(device)
+
+    evaluate_time = 60
+
+
+    sim_fps = 30
+    teleop_fps = 30
+    sim_teleop_ratio = math.ceil(sim_fps / teleop_fps)
+
+    dt_s = 1 / sim_fps
+
+    with mujoco.viewer.launch_passive(model, data) as viewer:
+        mujoco.mjv_defaultFreeCamera(model, viewer.cam)
+
+        timestamp = 0
+        start_evaluate_t = time.perf_counter()
+        while timestamp < evaluate_time:
+
+            start_loop_t = time.perf_counter()
+
+            # if counter % sim_teleop_ratio == 0:
+            observation = robot.capture_observation()
+
+            # Convert to pytorch format: channel first and float32 in [0,1]
+            # with batch dimension
+            for name in observation:
+                if "image" in name:
+                    observation[name] = observation[name].type(torch.float32) / 255
+                    observation[name] = observation[name].permute(2, 0, 1).contiguous()
+                observation[name] = observation[name].unsqueeze(0)
+                observation[name] = observation[name].to(device)
+
+            # Compute the next action with the policy
+            # based on the current observation
+            observation["observation.state"] = observation["observation.state"].float()
+            action = policy.select_action(observation)
+            # # Remove batch dimension
+            action = action.squeeze(0)
+            # # Move to cpu, if not already the case
+            action = action.to("cpu")
+            # # Order the robot to move
+            robot.send_action(action)
+            mujoco.mj_forward(model, data)
+            viewer.sync()
+
+            mujoco.mj_collision(model, data)
+            checkCollisions(model, data)
+
+            mujoco.mj_camlight(model, data)
+
+            # Note the below are optional: they are used to visualize the output of the
+            # fromto sensor which is used by the collision avoidance constraint.
+            mujoco.mj_fwdPosition(model, data)
+            mujoco.mj_sensorPos(model, data)
+
+
+            timestamp = time.perf_counter() - start_evaluate_t
+
+            dt_s = time.perf_counter() - start_loop_t
+            busy_wait(1 / sim_fps - dt_s)
+
 def fix_stats():
 
     repo_id="1g0rrr/test_painting"
@@ -532,6 +609,7 @@ if __name__ == "__main__":
 
     parser_replay = subparsers.add_parser("replay", parents=[base_parser])
     parser_replay = subparsers.add_parser("stats", parents=[base_parser])
+    parser_replay = subparsers.add_parser("evaluate", parents=[base_parser])
     args = parser.parse_args()
 
     if args.robot_name == "ur5e":
@@ -596,6 +674,8 @@ if __name__ == "__main__":
             replay(robot=robot) 
         elif control_mode == "stats":
             fix_stats()
+        elif control_mode == "evaluate":
+            evaluate(robot=robot)
     except Exception as e:
         print(f"Error: {e}")
         robot.disconnect()
