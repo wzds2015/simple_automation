@@ -5,7 +5,7 @@
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0 0 0"/>
-    <global azimuth="120" elevation="-20"/>
+    <global azimuth="15" elevation="-20"/>
   </visual>
 
   <asset>
